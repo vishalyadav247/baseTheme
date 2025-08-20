@@ -1,0 +1,59 @@
+{% comment %}
+This section is used in the product template to render product page with
+media gallery , add-to-cart form and other content.
+{% endcomment %}
+
+<section id="shopify-section-{{ section.id }}" class="product" data-product-section>
+  <div class="grid grid-cols-2 gap-4">
+
+    {% render 'product-media-gallery' %}
+
+    <div class="product-info">
+      <h1>{{ product.title }}</h1>
+      <p>{{ product.price | money }}</p>
+      <p>{{ product.description }}</p>
+      <div class="product-form">
+        {% form 'product', product %}
+        {% assign current_variant = product.selected_or_first_available_variant %}
+
+        <select name="id">
+          {% for variant in product.variants %}
+          <option value="{{ variant.id }}" {% if variant==current_variant %} selected="selected" {% endif %}>
+            {{ variant.title }} - {{ variant.price | money }}
+          </option>
+          {% endfor %}
+        </select>
+
+        <input type="text" name="quantity" min="1" value="1">
+
+        <input type="submit" value="Add to cart">
+        {{ form | payment_button }}
+        {% endform %}
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{% schema %}
+{
+"name": "t:general.product",
+"settings": [
+{ "type": "checkbox", "id": "show_nav", "label": "Show navigation arrows", "default": true },
+{ "type": "checkbox", "id": "show_dots", "label": "Show dots", "default": true },
+{ "type": "checkbox", "id": "loop", "label": "Loop slides", "default": true },
+{ "type": "checkbox", "id": "autoplay", "label": "Enable autoplay", "default": false },
+{ "type": "range", "id": "autoplay_speed", "label": "Autoplay speed (ms)", "min": 1500, "max": 8000, "step": 500,
+"default": 3500 },
+{ "type": "checkbox", "id": "enable_zoom", "label": "Enable hover zoom", "default": true }
+],
+"disabled_on": {
+"groups": ["header", "footer"]
+}
+}
+{% endschema %}
+
+<!-- product JSON for variant mapping -->
+<script id="ProductJson-{{ section.id }}" type="application/json">
+  {{ product.variants | json }}
+</script>
