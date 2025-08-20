@@ -1,47 +1,66 @@
-{% comment %}
-  This section is used in the collection template to render collection page
-  listing all products within a collection.
-
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/collection
+{% comment %} 
+                                    This section is used in the collection template to render collection page
+                                    listing all products within a collection.
+                                   
+                                    https://shopify.dev/docs/storefronts/themes/architecture/templates/collection 
 {% endcomment %}
 
 <h1>{{ collection.title }}</h1>
+{% if section.settings.sorting %}
+  {% render 'sorting' %}
+{% endif %}
 
-<div class="collection-products">
-  {% paginate collection.products by 20 %}
-    {% for product in collection.products %}
-      <div class="collection-product">
-        {% if product.featured_image %}
-          {% render 'image',
-            class: 'collection-product__image',
-            image: product.featured_image,
-            url: product.url,
-            width: 400,
-            height: 400,
-            crop: 'center'
-          %}
-        {% endif %}
-        <div class="collection-product__content">
-          <p>{{ product.title | escape | link_to: product.url }}</p>
-          <p>{{ product.price | money }}</p>
-        </div>
-      </div>
-    {% endfor %}
-
-    {{ paginate | default_pagination }}
-  {% endpaginate %}
+<div class="collection-products grid" style="--grid-gap:{{ section.settings.grid_gap }}px">
+  {% for product in collection.products %}
+    {% render 'product-card'
+ card_product: product
+      ,
+ section_id: section.id
+      ,
+ lazy_load: true
+    %}
+  {% endfor %}
 </div>
 
 {% stylesheet %}
   .collection-products {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--grid-gap);
+    img {
+      height: 100%;
+      object-fit: cover;
+    }
   }
 {% endstylesheet %}
 
 {% schema %}
-{
-  "name": "t:general.collection",
-  "settings": []
-}
+  {
+    "name": "t:general.collection",
+    "settings": [
+
+      {
+        "type": "checkbox",
+        "id": "hover_second_image",
+        "label": "Show second image on hover",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "sorting",
+        "label": "Sorting",
+        "default": false
+      },
+      {
+        "type": "range",
+        "id": "grid_gap",
+        "label": "t:labels.grid_gap",
+        "min": 0,
+        "max": 50,
+        "step": 5,
+        "unit": "px",
+        "default": 10
+      }
+
+    ]
+  }
 {% endschema %}
