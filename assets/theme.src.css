@@ -3,7 +3,7 @@
 /* optional: your small component layer */
 @layer components {
     .vishal {
-        @apply text-center;
+        @apply text-start;
     }
 }
 
