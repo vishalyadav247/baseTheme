@@ -35,6 +35,12 @@
 </div>
 
 {% stylesheet %}
+ h1 {
+    font-size: 24px;
+    @media(min-width: 767px) {
+      font-size: 34px;
+    }
+  }
   .collections {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(var(--collection-card-size), 100%), 1fr));
