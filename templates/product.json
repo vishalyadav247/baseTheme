@@ -11,8 +11,76 @@
   "sections": {
     "main": {
       "type": "main-product",
-      "settings": {}
+      "blocks": {
+        "vendor_idAAyz": {
+          "type": "vendor",
+          "settings": {}
+        },
+        "title_pCzQ6a": {
+          "type": "title",
+          "settings": {}
+        },
+        "sku_barcode_XDjBHD": {
+          "type": "sku_barcode",
+          "settings": {
+            "show_sku": true,
+            "show_barcode": false
+          }
+        },
+        "price_RahMqH": {
+          "type": "price",
+          "settings": {
+            "show_unit_price": true
+          }
+        },
+        "variant_select_GjNhH6": {
+          "type": "variant_select",
+          "settings": {}
+        },
+        "quantity_RC3arm": {
+          "type": "quantity",
+          "settings": {
+            "show_available_quantity": true
+          }
+        },
+        "notifications_9nRcfP": {
+          "type": "notifications",
+          "settings": {}
+        },
+        "atc_Tykdke": {
+          "type": "atc",
+          "settings": {}
+        },
+        "dynamic_checkout_eJNNaq": {
+          "type": "dynamic_checkout",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "vendor_idAAyz",
+        "title_pCzQ6a",
+        "sku_barcode_XDjBHD",
+        "price_RahMqH",
+        "variant_select_GjNhH6",
+        "quantity_RC3arm",
+        "notifications_9nRcfP",
+        "atc_Tykdke",
+        "dynamic_checkout_eJNNaq"
+      ],
+      "settings": {
+        "media_layout": "grid",
+        "thumbnail_view": "horizontal",
+        "show_media_nav": true,
+        "show_dots": true,
+        "show_slide_count": true,
+        "loop": true,
+        "autoplay": false,
+        "autoplay_speed": 4000,
+        "zoom_style": "popup"
+      }
     }
   },
-  "order": ["main"]
+  "order": [
+    "main"
+  ]
 }

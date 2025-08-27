@@ -1,0 +1,24 @@
+{%- comment -%} Price snippet: handles price, compare_at, unit price {%- endcomment -%}
+{%- assign variant = variant | default: product.selected_or_first_available_variant -%}
+
+<div class="space-y-1" data-price>
+  <div class="flex items-baseline gap-3">
+    <span class="text-xl font-semibold" data-price-amount>
+      {{ variant.price | money }}
+    </span>
+    {% if variant.compare_at_price > variant.price %}
+      <span class="text-sm line-through opacity-70" data-price-compare>
+        {{ variant.compare_at_price | money }}
+      </span>
+      <span class="text-sm text-green-700" data-price-save>
+        Save {{ variant.compare_at_price | minus: variant.price | money }}
+      </span>
+    {% endif %}
+  </div>
+
+  {% if show_unit and variant.unit_price_measurement %}
+    <div class="text-sm text-neutral-600" data-unit-price>
+      {{ variant.unit_price | money }} / {{ variant.unit_price_measurement.reference_value }}{{ variant.unit_price_measurement.reference_unit }}
+    </div>
+  {% endif %}
+</div>

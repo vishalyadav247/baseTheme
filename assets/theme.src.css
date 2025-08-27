@@ -2,13 +2,13 @@
 
 /* optional: your small component layer */
 @layer components {
-    .vishal {
-        @apply text-start;
-    }
+  .vishal {
+    @apply text-start;
+  }
 }
 
 @layer utilities {
-    :root {
-        --spacing: 20px;
-    }
+  :root {
+    --spacing: 0.25rem;
+  }
 }

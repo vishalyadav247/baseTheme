@@ -1,26 +1,29 @@
 {
-  // Your locale JSON files live in /locales
-  "i18n-ally.localesPaths": ["locales"],
-
-  // Match Shopify filenames like en.default.json, fr.json, etc.
-  "i18n-ally.pathMatcher": "{locale}*.json",
-
-  // English is the source of truth
-  "i18n-ally.sourceLanguage": "en",
-
-  // One file per locale (Shopify style)
-  "i18n-ally.dirStructure": "file",
-
-  // Only JSON parsers needed for Shopify
-  "i18n-ally.enabledParsers": ["json"],
-
-  // Nice editor extras
-  "i18n-ally.keystyle": "nested",
-  "i18n-ally.sortKeys": true,
-  "i18n-ally.showFlags": true,
-  "i18n-ally.annotationInPlace": true,
-
-  // Format JSON nicely
   "editor.formatOnSave": true,
-  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" }
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "i18n-ally.localesPaths": [
+    "locales"
+  ],
+  "[liquid]": {
+    "editor.defaultFormatter": "sissel.shopify-liquid",
+    "editor.formatOnSave": true
+  }
 }
