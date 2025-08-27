@@ -1,85 +1,155 @@
-<section id="product-media-gallery-{{ section.id }}" class="pmg-wrapper" data-autoplay="{{ section.settings.autoplay }}"
-    data-autoplay-speed="{{ section.settings.autoplay_speed }}" data-loop="{{ section.settings.loop }}"
-    data-show-dots="{{ section.settings.show_dots }}" data-show-nav="{{ section.settings.show_nav }}">
-    <div class="pmg">
-        <!-- Thumbnails (vertical desktop / horizontal mobile) -->
-        <div class="pmg-thumbs">
-            <button class="pmg-thumbs-nav pmg-thumbs-prev" type="button" aria-label="Scroll thumbnails up">▲</button>
-            <div class="pmg-thumbs-track">
-                {% assign medias = product.media | where: "media_type", "image" %}
-                {% for media in medias %}
-                <button class="pmg-thumb{% if forloop.first %} is-active{% endif %}" type="button"
-                    data-index="{{ forloop.index0 }}" aria-label="Thumb {{ forloop.index }}">
-                    <img loading="lazy" src="{{ media | img_url: '200x' }}" width="100" height="100"
-                        alt="{{ media.alt | escape }}">
-                </button>
-                {% endfor %}
-            </div>
-            <button class="pmg-thumbs-nav pmg-thumbs-next" type="button" aria-label="Scroll thumbnails down">▼</button>
-        </div>
+{{ 'product-media-gallery.css' | asset_url | stylesheet_tag: preload: true }}
 
-        <!-- Main Slider -->
-        <div class="pmg-main">
-            {% if section.settings.show_nav %}
-            <button class="pmg-prev" type="button" aria-label="Previous slide">‹</button>
-            {% endif %}
+<div
+  class="product-media-wrapper"
+  id="product-media-gallery-{{ section.id }}"
+  data-autoplay="{{autoplay}}"
+  {% if autoplay %}
+  data-autoplay-speed="{{ autoplay_speed }}"
+  {% endif %}
+  data-loop="{{ loop }}"
+  data-show-dots="{{ show_dots }}"
+  data-show-nav="{{ show_media_nav }}"
+  zoom-style="{{zoom_style}}">
+  <div class="product-media" view="{{section.settings.thumbnail_view}}">
+    <!-- Thumbnails (vertical desktop / horizontal mobile) -->
+    <div class="product-media-thumbs">
+      <button
+        class="product-media-thumbs-nav product-media-thumbs-prev"
+        type="button"
+        aria-label="Scroll thumbnails up">▲</button>
+      <div class="product-media-thumbs-track">
+        {% assign medias = product.media | where: "media_type", "image" %}
+        {% for media in medias %}
+          <button
+            class="product-media-thumb{% if forloop.first %} is-active{% endif %}"
+            type="button"
+            data-index="{{ forloop.index0 }}"
+            data-media-id="{{ media.id }}"
+            aria-label="Thumb {{ forloop.index }}">
+            <img
+              loading="lazy"
+              src="{{ media | img_url: '200x' }}"
+              width="100"
+              height="100"
+              alt="{{ media.alt | escape }}">
+          </button>
+        {% endfor %}
+      </div>
+      <button
+        class="product-media-thumbs-nav product-media-thumbs-next"
+        type="button"
+        aria-label="Scroll thumbnails down">▼</button>
+    </div>
 
-            <div class="pmg-track" role="region" aria-roledescription="carousel" aria-label="Product images">
-                {% for media in medias %}
-                <div class="pmg-slide{% if forloop.first %} is-active{% endif %}" data-index="{{ forloop.index0 }}">
-                    <button class="pmg-open-lightbox" type="button" aria-label="Open image {{ forloop.index }} larger">
-                        <img src="{{ media | img_url: '1024x1024' }}" srcset="
+    <!-- Main Slider -->
+    <div class="product-media-main">
+      {% if show_media_nav %}
+        <button
+          class="product-media-prev"
+          type="button"
+          aria-label="Previous slide">‹</button>
+      {% endif %}
+
+      <div
+        class="product-media-track"
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="Product images">
+        {% for media in medias %}
+          <div
+            class="product-media-slide{% if forloop.first %} is-active{% endif %}"
+            data-index="{{ forloop.index0 }}"
+            data-media-id="{{ media.id }}">
+            <button
+              class="product-media-open-lightbox"
+              type="button"
+              aria-label="Open image {{ forloop.index }} larger">
+              <img
+                src="{{ media | img_url: '1024x1024' }}"
+                srcset="
                   {{ media | img_url: '600x600' }} 600w,
                   {{ media | img_url: '900x900' }} 900w,
-                  {{ media | img_url: '1200x1200' }} 1200w" sizes="(max-width: 768px) 90vw, 700px"
-                            alt="{{ media.alt | escape }}" draggable="false">
-                    </button>
-                </div>
-                {% endfor %}
-            </div>
+                  {{ media | img_url: '1200x1200' }} 1200w"
+                sizes="(max-width: 768px) 90vw, 700px"
+                alt="{{ media.alt | escape }}"
+                draggable="false">
+            </button>
+          </div>
+        {% endfor %}
+      </div>
 
-            {% if section.settings.show_nav %}
-            <button class="pmg-next" type="button" aria-label="Next slide">›</button>
-            {% endif %}
+      {% if show_media_nav %}
+        <button
+          class="product-media-next"
+          type="button"
+          aria-label="Next slide">›</button>
+      {% endif %}
 
-            <div class="pmg-ui">
-                <div class="pmg-counter" aria-live="polite">
-                    <span class="pmg-current">1</span>/<span class="pmg-total">{{ medias.size }}</span>
-                </div>
+      <div class="product-media-ui">
+        {% if show_slide_count %}
+          <div class="product-media-counter" aria-live="polite">
+            <span class="product-media-current">1</span>/<span class="product-media-total">{{ medias.size }}</span>
+          </div>
+        {% endif %}
 
-                {% if section.settings.show_dots %}
-                <div class="pmg-dots" role="tablist" aria-label="Slide dots">
-                    {% for media in medias %}
-                    <button role="tab" class="pmg-dot{% if forloop.first %} is-active{% endif %}" type="button"
-                        data-index="{{ forloop.index0 }}" aria-label="Go to slide {{ forloop.index }}"></button>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-        </div>
+        {% if show_dots %}
+          <div
+            class="product-media-dots"
+            role="tablist"
+            aria-label="Slide dots">
+            {% for media in medias %}
+              <button
+                role="tab"
+                class="product-media-dot{% if forloop.first %} is-active{% endif %}"
+                type="button"
+                data-index="{{ forloop.index0 }}"
+                aria-label="Go to slide {{ forloop.index }}"></button>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
     </div>
+  </div>
 
-    <!-- LIGHTBOX -->
-    <div class="pmg-lightbox" hidden aria-hidden="true">
-        <div class="pmg-lightbox-backdrop"></div>
-        <div class="pmg-lightbox-content" role="dialog" aria-modal="true" aria-label="Image viewer">
-            <button class="pmg-lightbox-close" type="button" aria-label="Close">×</button>
-            <button class="pmg-lightbox-prev" type="button" aria-label="Previous">‹</button>
-            <figure class="pmg-lightbox-figure">
-                <img class="pmg-lightbox-img" alt="">
-                <figcaption class="pmg-lightbox-counter">
-                    <span class="pmg-lightbox-current">1</span>/<span class="pmg-lightbox-total">{{ medias.size
-                        }}</span>
-                </figcaption>
-            </figure>
-            <button class="pmg-lightbox-next" type="button" aria-label="Next">›</button>
-        </div>
+  {% if zoom_style == 'popup' %}
+    <div
+      class="product-media-lightbox"
+      hidden
+      aria-hidden="true">
+      <div class="product-media-lightbox-backdrop"></div>
+      <div
+        class="product-media-lightbox-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Image viewer">
+        <button
+          class="product-media-lightbox-close"
+          type="button"
+          aria-label="Close">×</button>
+        <button
+          class="product-media-lightbox-prev"
+          type="button"
+          aria-label="Previous">‹</button>
+        <figure class="product-media-lightbox-figure">
+          <img class="product-media-lightbox-img" alt="">
+          <figcaption class="product-media-lightbox-counter">
+            <span class="product-media-lightbox-current">1</span>
+            <span class="product-media-lightbox-total">
+              / {{ medias.size }}</span>
+          </figcaption>
+        </figure>
+        <button
+          class="product-media-lightbox-next"
+          type="button"
+          aria-label="Next">›</button>
+      </div>
     </div>
+  {% endif %}
 
-    <script src="{{ 'product-media-gallery.js' | asset_url }}" defer></script>
-    <link href="{{ 'product-media-gallery.css' | asset_url }}" rel="stylesheet">
+  <script src="{{ 'product-media-gallery.js' | asset_url }}" defer></script>
 
-    <script>
+  <script>
         document.addEventListener('shopify:section:load', (e) => {
             const root = e.target?.querySelector?.('[id^="product-media-gallery-"]');
             if (root && window.ProductMediaGallery?.init) window.ProductMediaGallery.init(root);
@@ -88,5 +158,5 @@
             const root = document.getElementById('product-media-gallery-{{ section.id }}');
             if (root && window.ProductMediaGallery?.init) window.ProductMediaGallery.init(root);
         });
-    </script>
-</section>
+  </script>
+</div>

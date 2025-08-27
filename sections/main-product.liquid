@@ -1,59 +1,353 @@
-{% comment %}
-This section is used in the product template to render product page with
-media gallery , add-to-cart form and other content.
-{% endcomment %}
+{% comment %} This section is used in the product template to render product page with media gallery ,Product Info add-to-cart form. {% endcomment %}
+{% liquid
+  assign product = product
+  assign variant = product.selected_or_first_available_variant
+  assign show_media_nav = section.settings.show_media_nav
+  assign show_dots = section.settings.show_dots
+  assign show_slide_count = section.settings.show_slide_count
+  assign loop = section.settings.loop
+  assign autoplay = section.settings.autoplay
+  assign autoplay_speed = section.settings.autoplay_speed
+  assign zoom_style = section.settings.zoom_style
+  assign media_layout = section.settings.media_layout
+%}
+<section id="shopify-section-{{ section.id }}" class="main-product">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
 
-<section id="shopify-section-{{ section.id }}" class="product" data-product-section>
-  <div class="grid grid-cols-2 gap-4">
+    {% if media_layout == "slider" %}
+      {% render 'product-media-gallery'
+        , product: product
+        , variant: variant
+        , show_media_nav: show_media_nav
+        , show_dots: show_dots
+        , show_slide_count: show_slide_count
+        , loop: loop
+        , autoplay: autoplay
+        , autoplay_speed: autoplay_speed
+        , zoom_style: zoom_style
+      %}
+    {% else %}
+      {% render 'product-media-grid'
+        , product: product
+        , variant: variant
+      %}
+    {% endif %}
 
-    {% render 'product-media-gallery' %}
-
-    <div class="product-info">
-      <h1>{{ product.title }}</h1>
-      <p>{{ product.price | money }}</p>
-      <p>{{ product.description }}</p>
-      <div class="product-form">
-        {% form 'product', product %}
-        {% assign current_variant = product.selected_or_first_available_variant %}
-
-        <select name="id">
-          {% for variant in product.variants %}
-          <option value="{{ variant.id }}" {% if variant==current_variant %} selected="selected" {% endif %}>
-            {{ variant.title }} - {{ variant.price | money }}
-          </option>
-          {% endfor %}
-        </select>
-
-        <input type="text" name="quantity" min="1" value="1">
-
-        <input type="submit" value="Add to cart">
-        {{ form | payment_button }}
-        {% endform %}
-      </div>
-    </div>
+    {% render 'product-info'
+      , product: product
+      , variant: variant
+    %}
 
   </div>
 </section>
 
 {% schema %}
-{
-"name": "t:general.product",
-"settings": [
-{ "type": "checkbox", "id": "show_nav", "label": "Show navigation arrows", "default": true },
-{ "type": "checkbox", "id": "show_dots", "label": "Show dots", "default": true },
-{ "type": "checkbox", "id": "loop", "label": "Loop slides", "default": true },
-{ "type": "checkbox", "id": "autoplay", "label": "Enable autoplay", "default": false },
-{ "type": "range", "id": "autoplay_speed", "label": "Autoplay speed (ms)", "min": 1500, "max": 8000, "step": 500,
-"default": 3500 },
-{ "type": "checkbox", "id": "enable_zoom", "label": "Enable hover zoom", "default": true }
-],
-"disabled_on": {
-"groups": ["header", "footer"]
-}
-}
+  {
+    "name": "t:main_product.name",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:main_product.product_media"
+      },
+      {
+        "type": "select",
+        "id": "media_layout",
+        "label": "Layout",
+        "options": [
+          {
+            "value": "slider",
+            "label": "Slider"
+          },
+          {
+            "value": "grid",
+            "label": "Grid"
+          }
+        ],
+        "default": "slider"
+      },
+      {
+        "type": "header",
+        "content": "Slider Settings"
+      },
+      {
+        "type": "select",
+        "id": "thumbnail_view",
+        "label": "Thumbnail Position",
+        "options": [
+          {
+            "value": "vertical_left",
+            "label": "Vertical - Left"
+          },
+          {
+            "value": "vertical_right",
+            "label": "Vertical - Right"
+          },
+          {
+            "value": "horizontal",
+            "label": "Horizontal"
+          }
+        ],
+        "default": "vertical_left"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_media_nav",
+        "label": "Show Media Navigation",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_dots",
+        "label": "Enable Dots",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_slide_count",
+        "label": "Enable Slide Counter",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "loop",
+        "label": "Infinite Loop",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "autoplay",
+        "label": "Enable Autoplay",
+        "default": false
+      },
+      {
+        "type": "range",
+        "id": "autoplay_speed",
+        "label": "Autoplay speed (ms)",
+        "min": 2500,
+        "max": 5000,
+        "step": 500,
+        "default": 3500
+      },
+      {
+        "type": "select",
+        "id": "zoom_style",
+        "label": "Zoom Effect",
+        "options": [
+          {
+            "value": "hover",
+            "label": "Hover"
+          },
+          {
+            "value": "popup",
+            "label": "Popup"
+          },
+          {
+            "value": "none",
+            "label": "none"
+          }
+        ],
+        "default": "popup"
+      },
+      {
+        "type": "header",
+        "content": "Grid Settings"
+      },
+      {
+        "type": "select",
+        "id": "grid_col_count",
+        "label": "Grid Columns",
+        "options": [
+          {
+            "value": "1",
+            "label": "1"
+          },
+          {
+            "value": "2",
+            "label": "2"
+          },
+          {
+            "value": "3",
+            "label": "3"
+          }
+        ],
+        "default": "2"
+      },
+      {
+        "type": "header",
+        "content": "Other Settings"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "vendor",
+        "name": "Vendor",
+        "limit": 1
+      },
+      {
+        "type": "title",
+        "name": "Title",
+        "limit": 1
+      },
+      {
+        "type": "price",
+        "name": "Price",
+        "limit": 1,
+        "settings": [
+          {
+            "type": "checkbox",
+            "id": "show_unit_price",
+            "label": "Show unit price",
+            "default": true
+          }
+        ]
+      },
+      {
+        "type": "sku_barcode",
+        "name": "SKU & Barcode",
+        "limit": 1,
+        "settings": [
+          {
+            "type": "checkbox",
+            "id": "show_sku",
+            "label": "Show SKU",
+            "default": true
+          },
+          {
+            "type": "checkbox",
+            "id": "show_barcode",
+            "label": "Show barcode",
+            "default": false
+          }
+        ]
+      },
+      {
+        "type": "variant_select",
+        "name": "Variant select",
+        "limit": 1
+      },
+      {
+        "type": "quantity",
+        "name": "Quantity",
+        "limit": 1,
+        "settings": [
+          {
+            "type": "checkbox",
+            "id": "show_available_quantity",
+            "label": "Show Available Quantity",
+            "default": true
+          }
+        ]
+      },
+      {
+        "type": "atc",
+        "name": "Add to cart",
+        "limit": 1
+      },
+      {
+        "type": "dynamic_checkout",
+        "name": "Dynamic checkout",
+        "limit": 1
+      },
+      {
+        "type": "description",
+        "name": "Description",
+        "limit": 1
+      },
+      {
+        "type": "notifications",
+        "name": "Notifications",
+        "limit": 1
+      },
+      {
+        "type": "richtext",
+        "name": "Rich text",
+        "settings": [
+          {
+            "type": "richtext",
+            "id": "content",
+            "label": "Content",
+            "default": "<p>Extra details here.</p>"
+          }
+        ]
+      },
+      {
+        "type": "usp",
+        "name": "USP",
+        "limit": 1,
+        "settings": [
+          {
+            "type": "text",
+            "id": "icon",
+            "label": "Icon",
+            "default": "✅"
+          },
+          {
+            "type": "text",
+            "id": "text",
+            "label": "Text",
+            "default": "Free shipping over ₹999"
+          }
+        ]
+      },
+      {
+        "type": "divider",
+        "name": "Divider"
+      }
+    ],
+    "presets": [
+      {
+        "name": "t:product.main_product.name",
+        "blocks": [
+          {
+            "type": "title"
+          },
+          {
+            "type": "price"
+          },
+          {
+            "type": "variant_select"
+          },
+          {
+            "type": "quantity"
+          },
+          {
+            "type": "atc"
+          },
+          {
+            "type": "dynamic_checkout"
+          },
+          {
+            "type": "description"
+          },
+          {
+            "type": "notifications"
+          }
+        ]
+      }
+    ],
+    "disabled_on": {
+      "groups": ["header", "footer"]
+    }
+  }
 {% endschema %}
-
-<!-- product JSON for variant mapping -->
-<script id="ProductJson-{{ section.id }}" type="application/json">
-  {{ product.variants | json }}
+<script type="application/json" data-variants-json>
+  [
+  {%- for v in product.variants -%}
+    {
+      "id": {{ v.id }},
+      "available": {{ v.available | json }},
+      "inventory_management": {{ v.inventory_management | json }},
+      "inventory_policy": {{ v.inventory_policy | json }},
+      "inventory_quantity": {{ v.inventory_quantity | default: 0 }},
+      "price": {{ v.price | json }},
+      "compare_at_price": {{ v.compare_at_price | json }},
+      "sku": {{ v.sku | json }},
+      "barcode": {{ v.barcode | json }},
+      "featured_media_id": {{ v.featured_media.id | json }},
+      "option1": {{ v.option1 | json }},
+      "option2": {{ v.option2 | json }},
+      "option3": {{ v.option3 | json }}
+    }{% unless forloop.last %},{% endunless %}
+  {%- endfor -%}
+  ]
 </script>

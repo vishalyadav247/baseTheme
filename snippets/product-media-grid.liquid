@@ -1,0 +1,35 @@
+{% style %}
+  .product-media-grid {
+    .product-media-item:first-child {
+      grid-area: 1 / 1 / 2 / -1;
+    }
+  }
+{% endstyle %}
+{% assign grid_col_count = section.settings.grid_col_count %}
+<div
+  class="product-media-grid grid gap-2
+  {% if grid_col_count == "1" %} grid-cols-1
+  {% elsif grid_col_count == "2" %} grid-cols-2
+  {% elsif grid_col_count == "3" %} grid-cols-3
+  {% endif %}"
+  role="region"
+  aria-roledescription="grid"
+  aria-label="Product images">
+  {% assign medias = product.media | where: "media_type", "image" %}
+  {% for media in medias %}
+    <div
+      class="product-media-item"
+      data-index="{{ forloop.index0 }}"
+      data-media-id="{{ media.id }}">
+      <img
+        src="{{ media | img_url: '1024x1024' }}"
+        srcset="
+                  {{ media | img_url: '600x600' }} 600w,
+                  {{ media | img_url: '900x900' }} 900w,
+                  {{ media | img_url: '1200x1200' }} 1200w"
+        sizes="(max-width: 768px) 90vw, 700px"
+        alt="{{ media.alt | escape }}"
+        draggable="false">
+    </div>
+  {% endfor %}
+</div>

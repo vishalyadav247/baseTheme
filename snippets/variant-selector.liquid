@@ -1,0 +1,118 @@
+{% stylesheet %}
+  [data-kind="size"] button[data-active="true"] {
+    border-color: red;
+  }
+{% endstylesheet %}
+
+{% unless product.has_only_default_variant %}
+  {%- comment -%} Option pickers: Color=swatch, Size=buttons, others=dropdown {%- endcomment -%}
+  {% if product.options_with_values.size > 0 %}
+
+    <div class="space-y-3 mt-2" data-swatch-root>
+      {% for opt in product.options_with_values %}
+        {% assign opt_index = forloop.index0 %}
+        {% assign opt_name_lc = opt.name | downcase %}
+
+          {% if opt_name_lc contains 'color' or opt_name_lc contains 'colour' %}
+          {% comment %} circle swatches {% endcomment %}
+          <div
+            class="space-y-2"
+            data-swatch-group
+            data-option-index="{{ opt_index }}"
+            data-kind="color">
+            <div class="text-sm font-medium">
+              {{ opt.name }}:
+              <span data-picked-label>{{ variant.options[opt_index] }}</span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              {% for val in opt.values %}
+                {% assign is_selected = false %}
+                {% if variant.options[opt_index] == val %}
+                  {% assign is_selected = true %}{% endif %}
+                {% assign css_color = val | strip %}
+                {% assign first_char = css_color | slice: 0, 1 %}
+
+                {% if first_char != '#' %}
+                  {% if css_color contains 'rgb' or css_color contains 'hsl' %}
+                  {% elsif css_color.size == 6 %}
+                    {% assign css_color = '#' | append: css_color %}
+                  {% endif %}
+                {% endif %}
+                <button
+                  type="button"
+                  class="w-7 h-7 rounded-full border relative"
+                  title="{{ val }}"
+                  aria-label="{{ val }}"
+                  data-swatch
+                  data-option-index="{{ opt_index }}"
+                  data-option-value="{{ val | escape }}"
+                  aria-pressed="{% if is_selected %}true{% else %}false{% endif %}"
+                  {% if is_selected %}
+                  data-active="true"
+                  {% endif %}
+                  style="background: {{ css_color }};">
+                  <span class="absolute inset-0 rounded-full ring-2 ring-offset-2 ring-transparent" data-sel-ring></span>
+                </button>
+              {% endfor %}
+            </div>
+          </div>
+
+        {% elsif opt_name_lc contains 'size' %}
+          {% comment %} Size as text buttons {% endcomment %}
+          <div
+            class="space-y-2"
+            data-swatch-group
+            data-option-index="{{ opt_index }}"
+            data-kind="size">
+            <div class="text-sm font-medium">
+              {{ opt.name }}:
+              <span data-picked-label>{{ variant.options[opt_index] }}</span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              {% for val in opt.values %}
+                {% assign is_selected = false %}
+                {% if variant.options[opt_index] == val %}
+                  {% assign is_selected = true %}{% endif %}
+                <button
+                  type="button"
+                  class="px-2 py-1 rounded-md border text-sm"
+                  data-swatch
+                  data-option-index="{{ opt_index }}"
+                  data-option-value="{{ val | escape }}"
+                  aria-pressed="{% if is_selected %}true{% else %}false{% endif %}"
+                  {% if is_selected %}
+                  data-active="true"
+                  {% endif %}>
+                  {{ val }}
+                </button>
+              {% endfor %}
+            </div>
+          </div>
+
+        {% else %}
+          {% comment %} Other options as dropdown {% endcomment %}
+          <div
+            class="flex flex-col"
+            data-swatch-group
+            data-option-index="{{ opt_index }}"
+            data-kind="dropdown">
+            <label class="text-sm font-medium">{{ opt.name }}</label>
+            <select
+              class="border rounded-md p-2 min-w-[200px] size-fit"
+              data-swatch-select
+              data-option-index="{{ opt_index }}">
+              {% for val in opt.values %}
+                <option
+                  value="{{ val | escape }}"
+                  {% if variant.options[opt_index] == val %}
+                  selected{% endif %}>{{ val }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endunless %}
+
+<script src="{{ 'variant-selector.js' | asset_url }}" defer></script>
