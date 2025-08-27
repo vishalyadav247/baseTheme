@@ -1,5 +1,33 @@
 {{ 'product-media-gallery.css' | asset_url | stylesheet_tag: preload: true }}
 
+{% liquid
+  assign media_layout = section.settings.media_layout
+
+  if media_layout == "slider"
+    assign thumbnail_position = section.settings.thumbnail_position
+    assign show_media_nav = section.settings.show_media_nav
+    assign show_dots = section.settings.show_dots
+    assign show_slide_count = section.settings.show_slide_count
+    assign loop = section.settings.loop
+    assign autoplay = section.settings.autoplay
+    assign autoplay_speed = section.settings.autoplay_speed
+    assign zoom_style = section.settings.zoom_style
+  else
+    assign thumbnail_position = "no_thumbnails"
+    assign show_media_nav = false
+    assign show_dots = false
+    assign show_slide_count = false
+    assign loop = false
+    assign autoplay = false
+    assign autoplay_speed = section.settings.autoplay_speed
+    assign zoom_style = section.settings.zoom_style
+    assign media_grid_count = section.settings.media_grid_count
+  endif
+%}
+
+{% assign medias = product.media | where: "media_type", "image" %}
+{% assign variant = product.selected_or_first_available_variant %}
+
 <div
   class="product-media-wrapper"
   id="product-media-gallery-{{ section.id }}"
@@ -10,38 +38,41 @@
   data-loop="{{ loop }}"
   data-show-dots="{{ show_dots }}"
   data-show-nav="{{ show_media_nav }}"
-  zoom-style="{{zoom_style}}">
-  <div class="product-media" view="{{section.settings.thumbnail_view}}">
-    <!-- Thumbnails (vertical desktop / horizontal mobile) -->
-    <div class="product-media-thumbs">
-      <button
-        class="product-media-thumbs-nav product-media-thumbs-prev"
-        type="button"
-        aria-label="Scroll thumbnails up">▲</button>
-      <div class="product-media-thumbs-track">
-        {% assign medias = product.media | where: "media_type", "image" %}
-        {% for media in medias %}
-          <button
-            class="product-media-thumb{% if forloop.first %} is-active{% endif %}"
-            type="button"
-            data-index="{{ forloop.index0 }}"
-            data-media-id="{{ media.id }}"
-            aria-label="Thumb {{ forloop.index }}">
-            <img
-              loading="lazy"
-              src="{{ media | img_url: '200x' }}"
-              width="100"
-              height="100"
-              alt="{{ media.alt | escape }}">
-          </button>
-        {% endfor %}
-      </div>
-      <button
-        class="product-media-thumbs-nav product-media-thumbs-next"
-        type="button"
-        aria-label="Scroll thumbnails down">▼</button>
-    </div>
+  zoom-style="{{zoom_style}}"
+  data-layout="{{media_layout}}">
+  <div class="product-media" view="{{thumbnail_position}}">
 
+    {% if thumbnail_position != 'no_thumbnails' %}
+      <!-- Thumbnails (vertical desktop / horizontal mobile) -->
+      <div class="product-media-thumbs">
+        <button
+          class="product-media-thumbs-nav product-media-thumbs-prev"
+          type="button"
+          aria-label="Scroll thumbnails up">▲</button>
+        <div class="product-media-thumbs-track">
+
+          {% for media in medias %}
+            <button
+              class="product-media-thumb{% if forloop.first %} is-active{% endif %}"
+              type="button"
+              data-index="{{ forloop.index0 }}"
+              data-media-id="{{ media.id }}"
+              aria-label="Thumb {{ forloop.index }}">
+              <img
+                loading="lazy"
+                src="{{ media | img_url: '200x' }}"
+                width="100"
+                height="100"
+                alt="{{ media.alt | escape }}">
+            </button>
+          {% endfor %}
+        </div>
+        <button
+          class="product-media-thumbs-nav product-media-thumbs-next"
+          type="button"
+          aria-label="Scroll thumbnails down">▼</button>
+      </div>
+    {% endif %}
     <!-- Main Slider -->
     <div class="product-media-main">
       {% if show_media_nav %}
@@ -52,7 +83,7 @@
       {% endif %}
 
       <div
-        class="product-media-track"
+        class="product-media-track{% if media_layout == 'grid' %}{% case media_grid_count %}{% when '1' %} grid-cols-1{% when '2' %} grid-cols-2{% when '3' %} grid-cols-3{% endcase %}{% endif %}"
         role="region"
         aria-roledescription="carousel"
         aria-label="Product images">

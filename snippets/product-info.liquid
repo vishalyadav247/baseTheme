@@ -1,7 +1,10 @@
 {% if request.params.variant %}
   {% assign v_from_url = product.variants | where: "id", request.params.variant | first %}
   {% if v_from_url %}
-    {% assign variant = v_from_url %}{% endif %}
+    {% assign variant = v_from_url %}
+  {% else %}
+    {% assign variant = product.selected_or_first_available_variant %}
+  {% endif %}
 {% endif %}
 
 <div
@@ -9,7 +12,6 @@
   data-product-info
   data-section-id="{{ section.id }}"
   data-product-handle="{{ product.handle }}">
-
   <form
     method="post"
     action="/cart/add"

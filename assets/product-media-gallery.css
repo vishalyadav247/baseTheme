@@ -259,6 +259,11 @@
       order: 2;
     }
   }
+
+  &[view="no_thumbnails"] {
+    display: block;
+  }
+
   &[view="horizontal"] {
     grid-template-columns: 1fr;
 
@@ -362,4 +367,19 @@
 
 .product-media-thumbs-track {
   scrollbar-gutter: stable both-edges;
+}
+
+@media screen and (min-width: 800px) {
+  [data-layout="grid"] .product-media-track {
+    display: grid;
+    gap: 20px;
+    will-change: unset;
+    touch-action: none;
+  }
+}
+
+.product-media-track {
+  & > div:first-child {
+    grid-area: 1 / 1 / 2 / -1;
+  }
 }
