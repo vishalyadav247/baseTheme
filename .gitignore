@@ -27,5 +27,4 @@ release
 *.zip
 
 # Tailwind build artifacts
-assets/theme.css
 assets/theme.css.map
