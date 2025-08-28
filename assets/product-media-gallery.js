@@ -1,5 +1,7 @@
 /* Product Media Gallery (Vanilla JS) — vertical thumbs desktop, horizontal mobile */
 (function () {
+  const _mmMobile = window.matchMedia("(max-width: 767px)");
+  const isMobile = () => _mmMobile.matches;
   const clamp = (n, min, max) => Math.max(min, Math.min(n, max));
   const qs = (root, sel) => root && root.querySelector(sel);
   const qsa = (root, sel) =>
@@ -468,9 +470,62 @@
 
   // --- EXPORT + REGISTRY ---
   window.ProductMediaGallery = window.ProductMediaGallery || {};
-  window.ProductMediaGallery.registry = {}; // storage for instances by sectionId
+  window.ProductMediaGallery.registry =
+    window.ProductMediaGallery.registry || {};
 
+  /**
+   * Initialize only when:
+   *  - layout !== 'grid', OR
+   *  - layout === 'grid' AND viewport is mobile (<=767px)
+   *
+   * If desktop+grid, defer init and auto-init when viewport becomes mobile.
+   */
   window.ProductMediaGallery.init = (root) => {
-    return new Slider(root); // constructor itself will register into registry
+    if (!root) return null;
+
+    // If already initialized for this section, return it
+    const secId = (root.id || "").replace("product-media-gallery-", "");
+    if (secId && window.ProductMediaGallery.registry[secId]) {
+      return window.ProductMediaGallery.registry[secId];
+    }
+
+    const layout = (root.dataset.layout || "").toLowerCase(); // expects 'grid' or 'slider'
+    const shouldInitNow = !(layout === "grid" && !isMobile());
+
+    if (shouldInitNow) {
+      // normal init right away
+      const inst = new Slider(root);
+      // If layout is grid, watch for change back to desktop and stop autoplay (optional)
+      if (layout === "grid") {
+        const onChange = (e) => {
+          if (!e.matches) {
+            // viewport left mobile → stop the motion, keep DOM clean
+            inst.stopAutoplay?.();
+            // snap to current index without transform jitter
+            inst.track && (inst.track.style.transition = "");
+            inst.track && (inst.track.style.transform = "");
+            // We keep the instance in registry; no need to destroy listeners since
+            // the grid layout will usually not render this markup on desktop.
+            _mmMobile.removeEventListener?.("change", onChange);
+            _mmMobile.removeListener?.(onChange);
+          }
+        };
+        _mmMobile.addEventListener?.("change", onChange);
+        _mmMobile.addListener?.(onChange);
+      }
+      return inst;
+    }
+
+    // Desktop + grid: do not init now. Defer until viewport becomes mobile.
+    const lazyInit = (e) => {
+      if (e.matches) {
+        window.ProductMediaGallery.init(root); // will run the branch above
+        _mmMobile.removeEventListener?.("change", lazyInit);
+        _mmMobile.removeListener?.(lazyInit);
+      }
+    };
+    _mmMobile.addEventListener?.("change", lazyInit);
+    _mmMobile.addListener?.(lazyInit);
+    return null;
   };
 })();

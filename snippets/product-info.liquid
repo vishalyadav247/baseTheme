@@ -1,15 +1,10 @@
-{% if request.params.variant %}
-  {% assign v_from_url = product.variants | where: "id", request.params.variant | first %}
-  {% if v_from_url %}
-    {% assign variant = v_from_url %}{% endif %}
-{% endif %}
+{% assign variant = product.selected_or_first_available_variant %}
 
 <div
   class="product-info space-y-4"
   data-product-info
   data-section-id="{{ section.id }}"
   data-product-handle="{{ product.handle }}">
-
   <form
     method="post"
     action="/cart/add"
@@ -35,7 +30,7 @@
 
         {% when 'vendor' %}
           {% if product.vendor %}
-            <div class="text-sm text-neutral-500" {{ block.shopify_attributes }}>Brand - {{ product.vendor | upcase }}</div>
+            <div class="text-sm text-neutral-500" {{ block.shopify_attributes }}>Brand: {{ product.vendor | upcase }}</div>
           {% endif %}
 
         {% when 'title' %}
@@ -69,14 +64,16 @@
           {% render 'variant-selector'
             , product: product %}
 
-        {% when 'quantity' %}
-          {% if block.settings.show_available_quantity %}
-            <div class="available-quantity-wrapper">
-              <span>Available Quantity :
+        {% when 'stock_info' %}
+          <div class="available-quantity-wrapper">
+            {% if block.settings.label != blank %}
+              <span>{{ block.settings.label }} :
               </span>
-              <span data-avalable-quantity>{{ variant.inventory_quantity }}</span>
-            </div>
-          {% endif %}
+            {% endif %}
+            <span data-avalable-quantity>In Stock ( {{ variant.inventory_quantity }} )</span>
+          </div>
+
+        {% when 'quantity' %}
           <div class="flex items-center border rounded size-fit" {{ block.shopify_attributes }}>
             <button
               type="button"

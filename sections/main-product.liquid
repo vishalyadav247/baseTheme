@@ -1,42 +1,10 @@
 {% comment %} This section is used in the product template to render product page with media gallery ,Product Info add-to-cart form. {% endcomment %}
-{% liquid
-  assign product = product
-  assign variant = product.selected_or_first_available_variant
-  assign show_media_nav = section.settings.show_media_nav
-  assign show_dots = section.settings.show_dots
-  assign show_slide_count = section.settings.show_slide_count
-  assign loop = section.settings.loop
-  assign autoplay = section.settings.autoplay
-  assign autoplay_speed = section.settings.autoplay_speed
-  assign zoom_style = section.settings.zoom_style
-  assign media_layout = section.settings.media_layout
-%}
+
 <section id="shopify-section-{{ section.id }}" class="main-product">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
 
-    {% if media_layout == "slider" %}
-      {% render 'product-media-gallery'
-        , product: product
-        , variant: variant
-        , show_media_nav: show_media_nav
-        , show_dots: show_dots
-        , show_slide_count: show_slide_count
-        , loop: loop
-        , autoplay: autoplay
-        , autoplay_speed: autoplay_speed
-        , zoom_style: zoom_style
-      %}
-    {% else %}
-      {% render 'product-media-grid'
-        , product: product
-        , variant: variant
-      %}
-    {% endif %}
-
-    {% render 'product-info'
-      , product: product
-      , variant: variant
-    %}
+    {% render 'product-media-gallery' %}
+    {% render 'product-info' %}
 
   </div>
 </section>
@@ -71,7 +39,7 @@
       },
       {
         "type": "select",
-        "id": "thumbnail_view",
+        "id": "thumbnail_position",
         "label": "Thumbnail Position",
         "options": [
           {
@@ -85,6 +53,10 @@
           {
             "value": "horizontal",
             "label": "Horizontal"
+          },
+          {
+            "value": "no_thumbnails",
+            "label": "No Thumbnails"
           }
         ],
         "default": "vertical_left"
@@ -154,7 +126,7 @@
       },
       {
         "type": "select",
-        "id": "grid_col_count",
+        "id": "media_grid_count",
         "label": "Grid Columns",
         "options": [
           {
@@ -228,15 +200,7 @@
       {
         "type": "quantity",
         "name": "Quantity",
-        "limit": 1,
-        "settings": [
-          {
-            "type": "checkbox",
-            "id": "show_available_quantity",
-            "label": "Show Available Quantity",
-            "default": true
-          }
-        ]
+        "limit": 1
       },
       {
         "type": "atc",
@@ -257,6 +221,20 @@
         "type": "notifications",
         "name": "Notifications",
         "limit": 1
+      },
+      {
+        "type": "stock_info",
+        "name": "Stock Info",
+        "limit": 1,
+        "settings": [
+          {
+            "type": "text",
+            "label": "Label",
+            "id": "label",
+            "default": "Available Stock",
+            "info": "Note: Clear label text to hide label."
+          }
+        ]
       },
       {
         "type": "richtext",
@@ -330,6 +308,7 @@
     }
   }
 {% endschema %}
+
 <script type="application/json" data-variants-json>
   [
   {%- for v in product.variants -%}

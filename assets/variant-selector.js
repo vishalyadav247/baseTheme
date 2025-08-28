@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const minusBtn = root.querySelector("[data-qty-minus]");
   const plusBtn = root.querySelector("[data-qty-plus]");
   const availableQuantity = root.querySelector("[data-avalable-quantity]");
-  const currentVariantCount = root.querySelector("[current-variant-count]");
 
   // Variants JSON
   const variants = (() => {
@@ -63,6 +62,46 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function updateMessage(v) {
+    if (!v.available) {
+      showMessage("error", "This variant is out of stock.");
+    } else if (
+      v.available &&
+      v.inventory_policy == "deny" &&
+      qtyInput.value > v.inventory_quantity
+    ) {
+      showMessage(
+        "error",
+        `Sorry! Currently you can't add more then ${v.inventory_quantity} quantities.`
+      );
+    } else {
+      showMessage("clear", "a");
+    }
+  }
+
+  function updateStockAvailablity(v, availableQuantity) {
+    const qty =
+      typeof v.inventory_quantity === "number" ? v.inventory_quantity : 0;
+
+    // Build the label
+    const label =
+      v.inventory_policy === "continue"
+        ? "In Stock"
+        : qty === 0
+        ? "Out Of Stock"
+        : `In Stock (${qty})`;
+
+    // Write text
+    availableQuantity.textContent = label;
+
+    // Decide "in stock" for styling
+    const inStock = v.inventory_policy === "continue" || qty > 0;
+
+    // Toggle classes
+    availableQuantity.classList.toggle("text-green-600", inStock);
+    availableQuantity.classList.toggle("text-red-600", !inStock);
+  }
+
   // how many units of a variant are already in the cart
   async function cartQtyForVariant(variantId) {
     try {
@@ -90,34 +129,26 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateATC(v) {
     if (!atcBtn) return;
     const qty = clampQty(qtyInput?.value);
-    const cap = capForVariant(v);
 
-    // Base availability
-    const baseAvailable = !!v?.available;
+    const variantAvailable = !!v?.available;
+    const qtyOk = qty <= v.inventory_quantity ? true : false;
 
-    // Also require qty to be within stock cap (when cap applies)
-    const qtyOk = cap == null ? true : qty <= cap;
-
-    console.log("baseAvailable", baseAvailable);
-    console.log("cap", cap);
-    console.log("qty", qty);
-    console.log("v.inventory_policy", v.inventory_policy);
-
-    if (baseAvailable && qtyOk) {
+    if (!variantAvailable) {
+      atcBtn.disabled = true;
+      atcBtn.setAttribute("aria-disabled", "true");
+      atcBtn.textContent = "Out Of Stock";
+    } else if (variantAvailable && v.inventory_policy == "deny" && !qtyOk) {
+      atcBtn.disabled = true;
+      atcBtn.setAttribute("aria-disabled", "true");
+      atcBtn.textContent = "Add to cart";
+    } else if (variantAvailable && v.inventory_policy == "continue") {
+      atcBtn.disabled = false;
+      atcBtn.setAttribute("aria-disabled", "false");
+      atcBtn.textContent = "Pre - Order";
+    } else {
       atcBtn.disabled = false;
       atcBtn.setAttribute("aria-disabled", "false");
       atcBtn.textContent = "Add to cart";
-    } else {
-      if (v.inventory_policy === "continue") {
-        atcBtn.disabled = false;
-        atcBtn.setAttribute("aria-disabled", "false");
-        atcBtn.textContent = "Add to cart";
-      } else {
-        if (baseAvailable && cap != null && qty > cap) {
-          atcBtn.disabled = true;
-          atcBtn.setAttribute("aria-disabled", "true");
-        }
-      }
     }
   }
 
@@ -269,32 +300,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (idField) idField.value = v.id;
     if (selectEl) selectEl.value = String(v.id);
     qtyInput.value = 1;
-    console.log(v);
 
-    // updateQtyUI(v); // NEW: enforce live cap on the qty input
-    updateATC(v); // changed: update ATC with qty+stock logic
-    const cap = capForVariant(v);
-    if (!v.available) {
-      showMessage("error", "This variant is out of stock.");
-    } else if (qtyInput.value > cap && v.inventory_policy === "deny") {
-      showMessage(
-        "error",
-        `Sorry! Currently you can't add more then ${cap} quantities.`
-      );
-    } else {
-      showMessage("clear", "a");
-    }
-
+    updateATC(v);
+    updateMessage(v);
     updateUrl(v.id);
     updateSkuBarcode(v);
     updateFeaturedMedia(v);
-    if (availableQuantity)
-      availableQuantity.innerText =
-        v.inventory_policy === "continue"
-          ? "Pre Order"
-          : v.inventory_quantity === 0
-          ? "Out Of Stock"
-          : v.inventory_quantity;
+    updateStockAvailablity(v, availableQuantity);
+
     try {
       await refreshServerBits(v.id);
     } catch (e) {
@@ -353,43 +366,20 @@ document.addEventListener("DOMContentLoaded", () => {
     return isNaN(n) || n < 1 ? 1 : n;
   }
 
-  function capForVariant(v) {
-    // Cap only if this variant is tracked and overselling is denied
-    if (!v) return null;
-    if (v.inventory_management && v.inventory_policy === "deny") {
-      return typeof v.inventory_quantity === "number"
-        ? v.inventory_quantity
-        : null;
-    }
-    return null;
-  }
-
   if (minusBtn && qtyInput) {
     minusBtn.addEventListener("click", () => {
       const v = byId.get(String(idField?.value));
       qtyInput.value = Math.max(1, clampQty(qtyInput.value) - 1);
-      const cap = capForVariant(v);
-      qtyInput.value > cap && v.inventory_policy === "deny"
-        ? showMessage(
-            "error",
-            `Sorry! Currently you can't add more then ${cap} quantities.`
-          )
-        : showMessage("clear", "a");
+      updateMessage(v);
       updateATC(v);
     });
   }
   if (plusBtn && qtyInput) {
     plusBtn.addEventListener("click", () => {
       const v = byId.get(String(idField?.value));
-      const cap = capForVariant(v);
       const next = clampQty(qtyInput.value) + 1;
       qtyInput.value = next;
-      qtyInput.value > cap && v.inventory_policy === "deny"
-        ? showMessage(
-            "error",
-            `Sorry! Currently you can't add more then ${cap} quantities.`
-          )
-        : showMessage("clear", "a");
+      updateMessage(v);
       updateATC(v);
     });
   }
@@ -398,14 +388,8 @@ document.addEventListener("DOMContentLoaded", () => {
     ["input", "change"].forEach((evt) =>
       qtyInput.addEventListener(evt, (e) => {
         const v = byId.get(String(idField?.value));
-        const cap = capForVariant(v);
         qtyInput.value = clampQty(e.target.value);
-        qtyInput.value > cap && v.inventory_policy === "deny"
-          ? showMessage(
-              "error",
-              `Sorry! Currently you can't add more then ${cap} quantities.`
-            )
-          : showMessage("clear", "a");
+        updateMessage(v);
         updateATC(v);
       })
     );
