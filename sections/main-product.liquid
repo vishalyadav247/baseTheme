@@ -200,15 +200,7 @@
       {
         "type": "quantity",
         "name": "Quantity",
-        "limit": 1,
-        "settings": [
-          {
-            "type": "checkbox",
-            "id": "show_available_quantity",
-            "label": "Show Available Quantity",
-            "default": true
-          }
-        ]
+        "limit": 1
       },
       {
         "type": "atc",
@@ -229,6 +221,20 @@
         "type": "notifications",
         "name": "Notifications",
         "limit": 1
+      },
+      {
+        "type": "stock_info",
+        "name": "Stock Info",
+        "limit": 1,
+        "settings": [
+          {
+            "type": "text",
+            "label": "Label",
+            "id": "label",
+            "default": "Available Stock",
+            "info": "Note: Clear label text to hide label."
+          }
+        ]
       },
       {
         "type": "richtext",
